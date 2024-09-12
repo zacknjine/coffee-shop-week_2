@@ -7,11 +7,11 @@ class Customer:
 
 
 class Coffee:
-    def __init__(self, type):
-        self.type = type
+    def __init__(self, name):
+        self.name = name
 
     def __repr__(self):
-        return f"Coffee(type={self.type!r})"
+        return f"Coffee(name={self.name!r})"
 
 
 class Order:
@@ -20,8 +20,16 @@ class Order:
     def __init__(self, coffee, customer, price):
         self.coffee = coffee
         self.customer = customer
-        self.price = price
+        self._set_price(price)
         Order.all_orders.append(self)
+
+    def _set_price(self, price):
+        if not hasattr(self, '_price') and isinstance(price, float) and 1.0 <= price <= 10.0:
+            self._price = price
+
+    @property
+    def price(self):
+        return self._price
 
     def __repr__(self):
         return f"Order(coffee={self.coffee!r}, customer={self.customer!r}, price={self.price!r})"
@@ -36,8 +44,8 @@ def test_order():
     coffee2 = Coffee("Latte")
 
     # Create Order instances
-    order1 = Order(customer=customer1, coffee=coffee1, price=4.5)
-    order2 = Order(customer=customer2, coffee=coffee2, price=7.0)
+    order1 = Order(coffee=coffee1, customer=customer1, price=4.5)
+    order2 = Order(coffee=coffee2, customer=customer2, price=7.0)
 
     # Print the orders
     print("Order 1:", order1.customer, order1.coffee, order1.price)
@@ -48,14 +56,19 @@ def test_order():
 
     # Attempt to set invalid prices
     print("Attempt to set an invalid price on order1:")
-    order1.price = 12.0  # Should not change
+    try:
+        order1._set_price(12.0)  # Should not change
+    except AttributeError:
+        print("Price cannot be changed after order is instantiated")
     print("Order 1 price after invalid set attempt:", order1.price)
 
     # Attempt to set valid prices
     print("Setting a valid price on order1:")
-    order1.price = 5.0  # Should change
+    try:
+        order1._set_price(5.0)  # Should not change
+    except AttributeError:
+        print("Price cannot be changed after order is instantiated")
     print("Order 1 price after valid set attempt:", order1.price)
 
 
-# Run the test
 test_order()
